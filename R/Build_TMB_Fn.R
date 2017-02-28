@@ -14,8 +14,10 @@
 #' @param Random OPTIONAL, a character vector of random effects
 #' @param Map OPTIONAL, a tagged list of parameters to either mirror or turn off
 #' @param DiagnosticDir OPTIONAL, a directory where diagonstic runtime information should be stored
-#' @param TmbDir OPTIONAL, a directory where the CPP file for the VAST model can be found locally
-#' @param RunDir OPTIONAL, a directory where the CPP file is copied, copiled, and run (must have write privileges or else the function will crash)
+#' @param TmbDir OPTIONAL, a directory where the CPP file for the VAST model can be found locally.
+#' Should be an absolute path rather than a relative path.
+#' @param RunDir OPTIONAL, a directory where the CPP file is copied, copiled, and run (must have write privileges or else the function will crash).
+#' Should be an absolute path rather than a relative path.
 #' @inheritParams Data_Fn
 
 #' @return Tagged list containing objects for running a VAST model
@@ -44,9 +46,13 @@ function( TmbData, Version, Q_Config=TRUE, CovConfig=TRUE,
   dircurrent <- getwd()
   on.exit(setwd(dircurrent))
 
+  RunDir <- makeabsolute(RunDir)
+  TmbDir <- makeabsolute(TmbDir)
+
   # Compile TMB software
   #dyn.unload( paste0(RunDir,"/",dynlib(TMB:::getUserDLL())) ) # random=Random,
-  file.copy( from=paste0(TmbDir,"/",Version,".cpp"), to=paste0(RunDir,"/",Version,".cpp"), overwrite=FALSE)
+  file.copy(from = file.path(TmbDir, paste0(Version, ".cpp")),
+    to = file.path(RunDir, paste0(Version, ".cpp")), overwrite=FALSE)
   setwd( RunDir )
   compile( paste0(Version,".cpp") )
 
@@ -57,7 +63,7 @@ function( TmbData, Version, Q_Config=TRUE, CovConfig=TRUE,
     }
     return( bounds )
   }
-  
+
   # Parameters
     # DataList=TmbData                                              # VAST:::
   if( length(Parameters)==1 && Parameters=="generate" ) Parameters = Param_Fn( Version=Version, DataList=TmbData, RhoConfig=RhoConfig )
@@ -86,7 +92,7 @@ function( TmbData, Version, Q_Config=TRUE, CovConfig=TRUE,
   #save(Save, file=paste0(RunDir,"/Save.RData"))
 
   # Build object
-  dyn.load( paste0(RunDir,"/",TMB::dynlib(Version)) ) # random=Random,
+  dyn.load( file.path(RunDir, TMB::dynlib(Version)) ) # random=Random,
   Obj <- MakeADFun(data=TmbData, parameters=Parameters, hessian=FALSE, map=Map, random=Random, inner.method="newton", DLL=Version)  #
   Obj$control <- list(trace=1, parscale=1, REPORT=1, reltol=1e-12, maxit=100)
 
@@ -105,7 +111,7 @@ function( TmbData, Version, Q_Config=TRUE, CovConfig=TRUE,
     }
     utils::write.table( matrix(Obj$par,nrow=1), row.names=FALSE, sep=",", col.names=FALSE, file=paste0(DiagnosticDir,"trace.csv"))
   }
-  
+
   # Declare upper and lower bounds for parameter search
   Bounds = matrix( NA, ncol=2, nrow=length(Obj$par), dimnames=list(names(Obj$par),c("Lower","Upper")) )
   Bounds[,'Lower'] = rep(-50, length(Obj$par))
