@@ -16,7 +16,7 @@
 #' @param DiagnosticDir OPTIONAL, a directory where diagonstic runtime information should be stored
 #' @param TmbDir OPTIONAL, a directory where the CPP file for the VAST model can be found locally.
 #' Should be an absolute path rather than a relative path.
-#' @param RunDir OPTIONAL, a directory where the CPP file is copied, copiled, and run (must have write privileges or else the function will crash).
+#' @param RunDir OPTIONAL, a directory where the CPP file is copied, compiled, and run (must have write privileges or else the function will crash).
 #' Should be an absolute path rather than a relative path.
 #' @inheritParams Data_Fn
 
