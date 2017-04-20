@@ -16,6 +16,9 @@
 Plot_factors = function( Report, ParHat, Data, SD, Year_Set=NULL, category_names=NULL,
   mapdetails_list=NULL, Dim_year=NULL, Dim_species=NULL, plotdir=paste0(getwd(),"/"), land_color="grey" ){
 
+  # Check director
+  plotdir <- makeabsolute(plotdir)
+
   # Fill in missing inputs
   if( "D_xct" %in% names(Report) ){
     if( is.null(Year_Set) ) Year_Set = 1:dim(Report$D_xct)[3]
@@ -62,7 +65,9 @@ Plot_factors = function( Report, ParHat, Data, SD, Year_Set=NULL, category_names
 
       # Plot loadings
       Dim_factor = Dim(Data[["FieldConfig"]][[Par_name]])
-      png( file=paste0(plotdir,"Factor_loadings--",Par_name,".png"), width=Dim_factor[2]*4, height=Dim_factor[1]*4, units="in", res=200 )
+      png( file=file.path(plotdir,
+        paste0("Factor_loadings--",Par_name,".png")),
+        width=Dim_factor[2]*4, height=Dim_factor[1]*4, units="in", res=200 )
         par( mfrow=Dim_factor, mar=c(0,2,2,0) )
         for( cI in 1:Data[["FieldConfig"]][[Par_name]] ) SpatialDFA::PlotLoadings( L_pj=Var_rot$L_pj_rot, whichfactor=cI )
       dev.off()
@@ -73,12 +78,12 @@ Plot_factors = function( Report, ParHat, Data, SD, Year_Set=NULL, category_names
         if( Par_name %in% c("Epsilon1","Epsilon2")){
           # plot_set=3; MappingDetails; Report; Sdreport=NULL; Nknots=Inf; PlotDF; MapSizeRatio=c('Width(in)'=4,'Height(in)'=4); Xlim; Ylim; FileName=paste0(getwd(),"/"); Year_Set=NULL; Years2Include=NULL; Rescale=FALSE; Rotate=0; Format="png"; Res=200; zone=NA; Cex=0.01; add=FALSE; category_names=NULL; textmargin=NULL; pch=NULL; Legend=list("use"=FALSE,"x"=c(10,30),"y"=c(10,30)); mfrow=NULL; plot_legend_fig=TRUE
           # plot_set=c(NA,6,NA,7)[i]; MappingDetails=mapdetails_list[["MappingDetails"]]; Report=list("D_xct"=Report$D_xct,"Epsilon1_sct"=Var_rot$Psi_rot,"Epsilon2_sct"=Var_rot$Psi_rot); PlotDF=mapdetails_list[["PlotDF"]]; MapSizeRatio=mapdetails_list[["MapSizeRatio"]]; Xlim=mapdetails_list[["Xlim"]]; Ylim=mapdetails_list[["Ylim"]]; FileName=plotdir; Year_Set=Year_Set; Rotate=mapdetails_list[["Rotate"]]; category_names=paste0("Factor_",1:length(category_names)); mar=c(0,0,2,0); oma=c(1.5,1.5,0,0); Cex=mapdetails_list[["Cex"]]; cex=1.8; mfrow=Dim_year; cex.main=1.0; Legend=mapdetails_list[["Legend"]]; zone=mapdetails_list[["Zone"]]; plot_legend_fig=FALSE; land_color=land_color
-          SpatialDeltaGLMM::PlotResultsOnMap_Fn(plot_set=c(NA,6,NA,7)[i], MappingDetails=mapdetails_list[["MappingDetails"]], Report=list("D_xct"=Var_rot$Psi_rot,"Epsilon1_sct"=Var_rot$Psi_rot,"Epsilon2_sct"=Var_rot$Psi_rot), PlotDF=mapdetails_list[["PlotDF"]], MapSizeRatio=mapdetails_list[["MapSizeRatio"]], Xlim=mapdetails_list[["Xlim"]], Ylim=mapdetails_list[["Ylim"]], FileName=plotdir, Year_Set=Year_Set, Rotate=mapdetails_list[["Rotate"]], category_names=paste0("Factor_",1:length(category_names)), mar=c(0,0,2,0), oma=c(1.5,1.5,0,0), Cex=mapdetails_list[["Cex"]], cex=1.8, mfrow=Dim_year, cex.main=1.0, Legend=mapdetails_list[["Legend"]], zone=mapdetails_list[["Zone"]], plot_legend_fig=FALSE, land_color=land_color)
+          SpatialDeltaGLMM::PlotResultsOnMap_Fn(plot_set=c(NA,6,NA,7)[i], MappingDetails=mapdetails_list[["MappingDetails"]], Report=list("D_xct"=Var_rot$Psi_rot,"Epsilon1_sct"=Var_rot$Psi_rot,"Epsilon2_sct"=Var_rot$Psi_rot), PlotDF=mapdetails_list[["PlotDF"]], MapSizeRatio=mapdetails_list[["MapSizeRatio"]], Xlim=mapdetails_list[["Xlim"]], Ylim=mapdetails_list[["Ylim"]], FileName=makeabsolute(plotdir, trailer = TRUE), Year_Set=Year_Set, Rotate=mapdetails_list[["Rotate"]], category_names=paste0("Factor_",1:length(category_names)), mar=c(0,0,2,0), oma=c(1.5,1.5,0,0), Cex=mapdetails_list[["Cex"]], cex=1.8, mfrow=Dim_year, cex.main=1.0, Legend=mapdetails_list[["Legend"]], zone=mapdetails_list[["Zone"]], plot_legend_fig=FALSE, land_color=land_color)
         }  #
 
         # Plot average factors across years
         Mat_sf = apply(Var_rot$Psi_rot, MARGIN=1:2, FUN=mean)
-        SpatialDeltaGLMM:::PlotMap_Fn( MappingDetails=mapdetails_list[["MappingDetails"]], Mat=Mat_sf, PlotDF=mapdetails_list[["PlotDF"]], MapSizeRatio=mapdetails_list[["MapSizeRatio"]], Xlim=mapdetails_list[["Xlim"]], Ylim=mapdetails_list[["Ylim"]], FileName=paste0(plotdir,"Factor_maps--",Par_name), Year_Set=paste0("Factor_",1:ncol(Mat_sf)), Rotate=mapdetails_list[["Rotate"]], zone=mapdetails_list[["Zone"]], mar=c(0,0,2,0), oma=c(2.5,2.5,0,0), Cex=0.01, mfrow=Dim_factor, pch=20, Legend=mapdetails_list[["Legend"]], plot_legend_fig=FALSE, land_color=land_color)
+        SpatialDeltaGLMM:::PlotMap_Fn( MappingDetails=mapdetails_list[["MappingDetails"]], Mat=Mat_sf, PlotDF=mapdetails_list[["PlotDF"]], MapSizeRatio=mapdetails_list[["MapSizeRatio"]], Xlim=mapdetails_list[["Xlim"]], Ylim=mapdetails_list[["Ylim"]], FileName=file.path(plotdir, paste0("Factor_maps--",Par_name)), Year_Set=paste0("Factor_",1:ncol(Mat_sf)), Rotate=mapdetails_list[["Rotate"]], zone=mapdetails_list[["Zone"]], mar=c(0,0,2,0), oma=c(2.5,2.5,0,0), Cex=0.01, mfrow=Dim_factor, pch=20, Legend=mapdetails_list[["Legend"]], plot_legend_fig=FALSE, land_color=land_color)
       }
     }else{
       L_list[[i]] = NULL
